@@ -34,28 +34,38 @@ The system uses a multi-agent approach with:
 
 ### CLI Development
 ```bash
-# Install dependencies
-poetry install
+# Install dependencies (✅ ALREADY COMPLETED - requirements.txt installed)
+# Complete requirements.txt created with all exact versions
+# .venv/Scripts/python.exe -m pip install -r requirements.txt  # DONE
 
-# Run hedge fund analysis
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA
+# Or install core packages individually:
+.venv/Scripts/python.exe -m pip install numpy pandas matplotlib langchain langgraph
+.venv/Scripts/python.exe -m pip install langchain-openai langchain-groq langchain-anthropic
+.venv/Scripts/python.exe -m pip install python-dotenv tabulate rich questionary colorama
+.venv/Scripts/python.exe -m pip install langchain-deepseek langchain-xai langchain-google-genai langchain-ollama langchain-gigachat
 
-# Run with local Ollama models
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA --ollama
+# Run hedge fund analysis (working command)
+.venv/Scripts/python.exe -m src.main --ticker AAPL,MSFT,NVDA
 
-# Run backtester
-poetry run python src/backtester.py --ticker AAPL,MSFT,NVDA
+# Run with local Ollama models  
+.venv/Scripts/python.exe -m src.main --ticker AAPL,MSFT,NVDA --ollama
+
+# Run backtester with CLI arguments (WORKING ✅)
+.venv/Scripts/python.exe -m src.backtester --tickers AAPL --start-date 2024-01-01 --end-date 2024-01-15 --analysts-all --initial-capital 10000 --model gpt-4o-mini
+
+# Run backtester with multiple tickers
+.venv/Scripts/python.exe -m src.backtester --tickers AAPL,MSFT,NVDA --analysts-all --model gpt-4o-mini
 
 # Run with date range
-poetry run python src/main.py --ticker AAPL --start-date 2024-01-01 --end-date 2024-03-01
+.venv/Scripts/python.exe -m src.main --ticker AAPL --start-date 2024-01-01 --end-date 2024-03-01
 
 # Code formatting and linting
-poetry run black src/ tests/ --line-length 420
-poetry run isort src/ tests/ --profile black
-poetry run flake8 src/ tests/
+.venv/Scripts/python.exe -m black src/ tests/ --line-length 420
+.venv/Scripts/python.exe -m isort src/ tests/ --profile black
+.venv/Scripts/python.exe -m flake8 src/ tests/
 
 # Run tests
-poetry run pytest tests/
+.venv/Scripts/python.exe -m pytest tests/
 ```
 
 ### Web Application Development
@@ -64,9 +74,13 @@ poetry run pytest tests/
 ./run.sh        # Mac/Linux
 run.bat         # Windows
 
-# Manual backend setup
-cd app/backend
-poetry run uvicorn main:app --reload
+# Manual backend setup (✅ Dependencies already installed via requirements.txt)
+# IMPORTANT: Run from project root, not app/backend directory
+.venv/Scripts/python.exe -m uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
+
+# If FastAPI/uvicorn missing, install individually:
+.venv/Scripts/python.exe -m pip install fastapi==0.104.1
+.venv/Scripts/python.exe -m pip install uvicorn[standard]==0.35.0
 
 # Manual frontend setup  
 cd app/frontend
@@ -97,11 +111,18 @@ docker-compose up frontend
 
 ## Environment Configuration
 
-Required environment variables in `.env`:
-- `OPENAI_API_KEY`: For GPT models (required)
-- `GROQ_API_KEY`: For Groq-hosted models (optional)
+**Current Working Setup (Windows 11, Git Bash, Non-Admin):**
+- **Python**: 3.13.5 (global installation)
+- **Poetry**: ❌ NOT WORKING (permission issues - use pip instead)
+- **MinGW-w64 GCC**: 14.2.0 (portable: `/c/Users/cas3526/dev/tools/mingw64/mingw64/`)
+- **Dependencies**: Installed in .venv virtual environment using pip directly
+- **Requirements.txt**: Complete with 100+ exact versions from poetry.lock analysis
+
+Required environment variables in `.env` (✅ WORKING):
+- `OPENAI_API_KEY`: For GPT models (✅ configured)
+- `GROQ_API_KEY`: For Groq-hosted models (✅ configured) 
 - `ANTHROPIC_API_KEY`: For Claude models (optional)
-- `FINANCIAL_DATASETS_API_KEY`: For extended financial data (optional, AAPL/GOOGL/MSFT/NVDA/TSLA are free)
+- `FINANCIAL_DATASETS_API_KEY`: For extended financial data (✅ configured)
 
 ## Key Implementation Details
 
@@ -134,3 +155,67 @@ Required environment variables in `.env`:
 - Docker containerization available
 - No production deployment infrastructure (educational project)
 - Shell scripts provided for easy setup across platforms
+
+## Windows-Specific Setup Notes
+
+**Current Status: ✅ PRODUCTION READY - WEB APP FULLY FUNCTIONAL**
+
+### Key Learnings from Setup:
+1. **Poetry**: Use custom directory installation (`/c/Users/cas3526/dev/tools/poetry/`) to avoid permission issues
+2. **Dependencies**: Install in Poetry .venv using `.venv/Scripts/python.exe -m pip install` to avoid permission issues
+3. **Compiler**: Portable MinGW-w64 GCC installation for package compilation without admin privileges
+4. **PATH**: Custom PATH configuration in `~/.bashrc` for persistent tool access
+5. **Backtester**: Added `--model` CLI argument to avoid interactive prompts that don't work in Git Bash
+6. **Requirements.txt**: Created comprehensive dependency file with exact versions for reproducible builds
+
+### Known Working Commands:
+```bash
+# Verify environment
+python --version  # Should show: Python 3.13.5
+poetry --version  # Should show: Poetry (version 2.1.4)  
+gcc --version     # Should show: gcc.exe (MinGW-W64... 14.2.0)
+
+# Test dependencies in virtual environment
+.venv/Scripts/python.exe -c "from dateutil.relativedelta import relativedelta; import questionary; import colorama; import pandas; import langchain; print('All dependencies working!')"
+
+# Test basic functionality (WORKING ✅)
+.venv/Scripts/python.exe -m src.main --ticker AAPL
+
+# Test backtester with full CLI control (WORKING ✅)
+.venv/Scripts/python.exe -m src.backtester --tickers AAPL --start-date 2024-01-01 --end-date 2024-01-15 --analysts-all --initial-capital 10000 --model gpt-4o-mini
+
+# Available backtester CLI options:
+# --tickers AAPL,MSFT,NVDA
+# --start-date YYYY-MM-DD  
+# --end-date YYYY-MM-DD
+# --analysts-all (or --analysts analyst1,analyst2)
+# --initial-capital 50000
+# --margin-requirement 0.5
+# --model gpt-4o-mini (avoids interactive prompt)
+# --ollama (for local models)
+
+# Web Application (WORKING ✅)
+# Backend (run from project root):
+.venv/Scripts/python.exe -m uvicorn app.backend.main:app --reload --host 127.0.0.1 --port 8000
+
+# Frontend (run from app/frontend/):
+cd app/frontend && npm run dev
+
+# Access points:
+# - Frontend: http://localhost:5173
+# - Backend API: http://localhost:8000  
+# - API Docs: http://localhost:8000/docs
+```
+
+### Troubleshooting:
+- If Poetry permission denied: `chmod +x "/c/Users/cas3526/dev/tools/poetry/bin/poetry"`
+- If import errors in .venv: `.venv/Scripts/python.exe -m pip install [package-name]`
+- If missing dependencies: `.venv/Scripts/python.exe -m pip install -r requirements.txt`
+- If PATH issues: `source ~/.bashrc`
+- If backtester interactive prompts fail: Use `--model gpt-4o-mini` and `--analysts-all` arguments
+- If financial data API issues: Check `.env` file has valid `FINANCIAL_DATASETS_API_KEY`
+- **Web App Specific Issues**:
+  - If "No module named 'fastapi'" error: `.venv/Scripts/python.exe -m pip install fastapi==0.104.1 uvicorn[standard]==0.35.0`
+  - If backend fails to start: Ensure you're running from project root, not `app/backend/`
+  - If "Permission denied" on npm packages: Try `npm audit fix` or delete `node_modules/` and reinstall
+  - If ports in use: Kill processes with `taskkill /f /im python.exe` and `taskkill /f /im node.exe` on Windows
